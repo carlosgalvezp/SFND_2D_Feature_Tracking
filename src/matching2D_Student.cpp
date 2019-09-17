@@ -171,7 +171,7 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
     t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
     std::cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
 
-    // visualize keypoints
+    // Optionally visualize
     if (bVis)
     {
         visualizeKeypoints(img, keypoints, "Harris Corner Detection Results");
@@ -180,5 +180,47 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
 
 void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis)
 {
+    // Create detector. They all inherit from the cv::Feature2D interface class
+    cv::Ptr<cv::Feature2D> detector;
 
+    double t = static_cast<double>(cv::getTickCount());
+
+    if (detectorType == "FAST")
+    {
+        detector = cv::FastFeatureDetector::create();
+    }
+    else if (detectorType == "BRISK")
+    {
+        detector = cv::BRISK::create();
+    }
+    else if (detectorType == "ORB")
+    {
+        detector = cv::ORB::create();
+    }
+    else if (detectorType == "AKAZE")
+    {
+        detector = cv::AKAZE::create();
+    }
+    else if (detectorType == "SIFT")
+    {
+        detector = cv::xfeatures2d::SIFT::create();
+    }
+    else
+    {
+        std::cerr << "Unknown detector type " << detectorType << std::endl;
+        return;
+    }
+
+    // Compute keypoints
+    detector->detect(img, keypoints);
+
+    t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
+    std::cout << detectorType << " detection with n=" << keypoints.size() << " keypoints "
+              << "in " << 1000 * t / 1.0 << " ms" << std::endl;
+
+    // Optionally visualize
+    if (bVis)
+    {
+        visualizeKeypoints(img, keypoints, detectorType + " Corner Detection Results");
+    }
 }
