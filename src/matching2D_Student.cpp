@@ -51,20 +51,35 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
 void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType)
 {
     // select appropriate descriptor
-    cv::Ptr<cv::DescriptorExtractor> extractor;
-    if (descriptorType.compare("BRISK") == 0)
+    cv::Ptr<cv::Feature2D> extractor;
+    if (descriptorType == "BRISK")
     {
-
-        int threshold = 30;        // FAST/AGAST detection threshold score.
-        int octaves = 3;           // detection octaves (use 0 to do single scale)
-        float patternScale = 1.0f; // apply this scale to the pattern used for sampling the neighbourhood of a keypoint.
-
-        extractor = cv::BRISK::create(threshold, octaves, patternScale);
+        extractor = cv::BRISK::create();
+    }
+    else if (descriptorType == "BRIEF")
+    {
+        extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
+    }
+    else if (descriptorType == "ORB")
+    {
+        extractor = cv::ORB::create();
+    }
+    else if (descriptorType == "FREAK")
+    {
+        extractor = cv::xfeatures2d::FREAK::create();
+    }
+    else if (descriptorType == "AKAZE")
+    {
+        extractor = cv::AKAZE::create();
+    }
+    else if (descriptorType == "SIFT")
+    {
+        extractor = cv::xfeatures2d::SIFT::create();
     }
     else
     {
-
-        //...
+        std::cerr << "Unknown descriptor type " << descriptorType << std::endl;
+        return;
     }
 
     // perform feature description
