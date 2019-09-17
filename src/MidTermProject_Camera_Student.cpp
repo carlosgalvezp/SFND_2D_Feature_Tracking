@@ -58,11 +58,24 @@ int main(int argc, const char *argv[])
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.1 -> replace the following code with ring buffer of size dataBufferSize
-
-        // push image into data frame buffer
-        DataFrame frame;
+        DataFrame frame{};
         frame.cameraImg = imgGray;
-        dataBuffer.push_back(frame);
+
+        if (dataBuffer.size() < dataBufferSize)  // If the buffer is not yet full, simply push back
+        {
+            dataBuffer.push_back(frame);
+        }
+        else  // Otherwise shift data and place new frame in the back
+        {
+            // Shift contents in ring buffer
+            for (std::size_t i = 1U; i < dataBuffer.size(); ++i)
+            {
+                dataBuffer[i - 1U] = dataBuffer[i];
+            }
+
+            // Add new image to the back
+            dataBuffer.back() = frame;
+        }
 
         //// EOF STUDENT ASSIGNMENT
         cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
