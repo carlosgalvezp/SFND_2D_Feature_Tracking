@@ -17,34 +17,72 @@ void visualizeKeypoints(const cv::Mat& img,
 }  // namespace
 
 // Find best matches for keypoints in two camera images based on several matching methods
-void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
-                      std::vector<cv::DMatch> &matches, std::string descriptorType, std::string matcherType, std::string selectorType)
+void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
+                      std::vector<cv::KeyPoint> &kPtsRef,
+                      cv::Mat &descSource,
+                      cv::Mat &descRef,
+                      std::vector<cv::DMatch> &matches,
+                      std::string descriptorType,
+                      std::string matcherType,
+                      std::string selectorType)
 {
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
 
-    if (matcherType.compare("MAT_BF") == 0)
+    if (matcherType == "MAT_BF")
     {
         int normType = cv::NORM_HAMMING;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
-    else if (matcherType.compare("MAT_FLANN") == 0)
+    else if (matcherType == "MAT_FLANN")
     {
-        // ...
+        // Convert binary descriptors to floating point due to a bug in current OpenCV implementation
+        if (descSource.type() != CV_32F)
+        {
+            descSource.convertTo(descSource, CV_32F);
+            descRef.convertTo(descRef, CV_32F);
+        }
+
+        matcher = cv::FlannBasedMatcher::create();
+    }
+    else
+    {
+        std:: cerr << "Unknown matcher " << matcherType << std::endl;
+        return;
     }
 
     // perform matching task
-    if (selectorType.compare("SEL_NN") == 0)
-    { // nearest neighbor (best match)
-
+    if (selectorType == "SEL_NN")
+    {
+        // nearest neighbor (best match)
         matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
     }
-    else if (selectorType.compare("SEL_KNN") == 0)
-    { // k nearest neighbors (k=2)
+    else if (selectorType == "SEL_KNN")
+    {
+        // k nearest neighbors (k=2)
+        std::vector<std::vector<cv::DMatch>> knn_matches;
 
-        // ...
+        const int k = 2;
+        matcher->knnMatch(descSource, descRef, knn_matches, k);
+
+        // Compute distance ratio and only keep non-ambiguous matches
+        const float min_desc_dist_ratio = 0.8F;
+        for (const std::vector<cv::DMatch>& match_pair : knn_matches)
+        {
+            const float distance_ratio = match_pair[0].distance / match_pair[1].distance;
+            if (distance_ratio < min_desc_dist_ratio)
+            {
+                matches.push_back(match_pair[0]);
+            }
+        }
     }
+    else
+    {
+        std::cout << "Unknown selector " << selectorType << std::endl;
+    }
+
+    std::cout << "Found " << matches.size() << " matches" << std::endl;
 }
 
 // Use one of several types of state-of-art descriptors to uniquely identify keypoints
