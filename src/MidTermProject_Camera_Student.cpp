@@ -19,9 +19,9 @@
 
 void runExperiment(const DetectorType& detectorType, const DescriptorType& descriptorType)
 {
-    std::cout << "=================================================================================";
-    std::cout << "Experiment with detector: " << detectorType << ", descriptor: " << descriptorType << std::endl;
-    std::cout << "=================================================================================";
+    std::cout << "=======================================================" << std::endl;
+    std::cout << "Experiment: " << detectorType << " + " << descriptorType << std::endl;
+    std::cout << "=======================================================" << std::endl;
     /* INIT VARIABLES AND DATA STRUCTURES */
 
     // data location
@@ -83,7 +83,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
         }
 
         //// EOF STUDENT ASSIGNMENT
-        std::cout << "#1 : LOAD IMAGE INTO BUFFER done" << std::endl;
+        // std::cout << "#1 : LOAD IMAGE INTO BUFFER done" << std::endl;
 
         /* DETECT IMAGE KEYPOINTS */
 
@@ -149,7 +149,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
 
         // push keypoints and descriptor for current frame to end of data buffer
         dataBuffer.back().keypoints = keypoints;
-        std::cout << "#2 : DETECT KEYPOINTS done" << std::endl;
+        // std::cout << "#2 : DETECT KEYPOINTS done" << std::endl;
 
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
@@ -164,7 +164,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
         // push descriptors for current frame to end of data buffer
         dataBuffer.back().descriptors = descriptors;
 
-        std::cout << "#3 : EXTRACT DESCRIPTORS done" << std::endl;
+        // std::cout << "#3 : EXTRACT DESCRIPTORS done" << std::endl;
 
         if (dataBuffer.size() > 1) // wait until at least two images have been processed
         {
@@ -184,7 +184,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
             // store matches in current data frame
             dataBuffer.back().kptMatches = matches;
 
-            std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << std::endl;
+            // std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << std::endl;
 
             // visualize matches between current and previous image
             bVis = true;
@@ -197,14 +197,19 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
                                 cv::Scalar::all(-1), cv::Scalar::all(-1),
                                 std::vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-                std::string windowName = "Matching keypoints between two camera images";
+                std::stringstream ss;
+                ss << "[" << detectorType << ", " << descriptorType << "] "
+                   << "Matching keypoints between two camera images";
+                std::string windowName = ss.str();
                 cv::namedWindow(windowName, 7);
                 cv::imshow(windowName, matchImg);
-                std::cout << "Press key to continue to next image" << std::endl;
+                // std::cout << "Press key to continue to next image" << std::endl;
                 cv::waitKey(0); // wait for key to be pressed
             }
             bVis = false;
         }
+
+        std::cout << "-------------------------------------------------------------" << std::endl;
 
     } // eof loop over all images
 }
