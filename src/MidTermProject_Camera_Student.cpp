@@ -208,7 +208,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
             // std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << std::endl;
 
             // visualize matches between current and previous image
-            bVis = true;
+            bVis = false;
             if (bVis)
             {
                 cv::Mat matchImg = dataBuffer.back().cameraImg.clone();
@@ -225,17 +225,16 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
                 cv::namedWindow(windowName, 7);
                 cv::imshow(windowName, matchImg);
                 // std::cout << "Press key to continue to next image" << std::endl;
-                cv::waitKey(0); // wait for key to be pressed
+                // cv::waitKey(0); // wait for key to be pressed
             }
             bVis = false;
         }
-
         std::cout << "-------------------------------------------------------------" << std::endl;
 
     } // eof loop over all images
 
     // Display statistics for Excel
-    std::cout << "------------------ STATISTICS--------------";
+    std::cout << "-------- STATISTICS " << detectorType << "+" << descriptorType << "---------" << std::endl;
     displayStatistics("Detected keypoints: ", detected_keypoints);
     displayStatistics("Matched keypoints: ", matched_keypoints);
     displayStatistics("Detector computation time (ms): ", computation_time_detector);
@@ -248,6 +247,8 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
               << (*std::max_element(computation_time_detector.begin(), computation_time_detector.end()) +
                   *std::max_element(computation_time_descriptor.begin(), computation_time_descriptor.end()))
               << std::endl;
+
+    // cv::waitKey(0); // wait for key to be pressed
 }
 
 bool isValidExperiment(const DetectorType& detector_type, const DescriptorType& descriptor_type)

@@ -125,8 +125,8 @@ void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &
     // perform feature description
     double t = (double)cv::getTickCount();
     extractor->compute(img, keypoints, descriptors);
-    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    std::cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" <<std::endl;
+    t = 1000.0 * ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    std::cout << descriptorType << " descriptor extraction in " << t << " ms" <<std::endl;
 
     computation_time_descriptor.push_back(t);
 }
@@ -157,8 +157,8 @@ void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, b
         new_keypoint.size = block_size;
         keypoints.push_back(new_keypoint);
     }
-    t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
-    std::cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
+    t = 1000.0 * (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
+    std::cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << t << " ms" << std::endl;
 
     // visualize results
     if (bVis)
@@ -229,8 +229,8 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
         }
     }
 
-    t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
-    std::cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
+    t = 1000.0 * (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
+    std::cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << t << " ms" << std::endl;
 
     // Optionally visualize
     if (bVis)
@@ -278,9 +278,9 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
 
     detector->detect(img, keypoints);
 
-    t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
+    t = 1000.0 * (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();
     std::cout << detectorType << " detection with n=" << keypoints.size() << " keypoints "
-              << "in " << 1000 * t / 1.0 << " ms" << std::endl;
+              << "in " << t << " ms" << std::endl;
 
     // Optionally visualize
     if (bVis)
@@ -295,7 +295,7 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
 
 std::ostream& operator<<(std::ostream& os, const DetectorType& x)
 {
-    if (x == DetectorType::AKAZE) { os << "AZAKE"; }
+    if (x == DetectorType::AKAZE) { os << "AKAZE"; }
     else if (x == DetectorType::BRISK) { os << "BRISK"; }
     else if (x == DetectorType::FAST) { os << "FAST"; }
     else if (x == DetectorType::HARRIS) { os << "HARRIS"; }
@@ -307,7 +307,7 @@ std::ostream& operator<<(std::ostream& os, const DetectorType& x)
 
 std::ostream& operator<<(std::ostream& os, const DescriptorType& x)
 {
-    if (x == DescriptorType::AKAZE) { os << "AZAKE"; }
+    if (x == DescriptorType::AKAZE) { os << "AKAZE"; }
     else if (x == DescriptorType::BRIEF) { os << "BRIEF"; }
     else if (x == DescriptorType::BRISK) { os << "BRISK"; }
     else if (x == DescriptorType::FREAK) { os << "FREAK"; }
