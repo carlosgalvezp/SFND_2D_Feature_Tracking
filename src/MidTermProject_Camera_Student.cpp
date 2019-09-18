@@ -38,6 +38,13 @@ int main(int argc, const char *argv[])
     std::vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
 
+    // Experiment configuration
+    const DetectorType detectorType = DetectorType::SIFT;
+    const DescriptorType descriptorType = DescriptorType::BRISK;
+    const MatcherType matcherType = MatcherType::BF;
+    const DescriptorFormat descriptorFormat = DescriptorFormat::BINARY;
+    const SelectorType selectorType = SelectorType::NN;
+
     /* MAIN LOOP OVER ALL IMAGES */
 
     for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
@@ -82,7 +89,6 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         std::vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        DetectorType detectorType = DetectorType::SHITOMASI;
         bool visualize_detections = false;
 
         //// STUDENT ASSIGNMENT
@@ -123,6 +129,8 @@ int main(int argc, const char *argv[])
 
         keypoints = filtered_keypoints;
 
+        std::cout << "Preceeding vehicle keypoints: " << keypoints.size() << std::endl;
+
         //// EOF STUDENT ASSIGNMENT
 
         // optional : limit number of keypoints (helpful for debugging and learning)
@@ -143,6 +151,7 @@ int main(int argc, const char *argv[])
         dataBuffer.back().keypoints = keypoints;
         std::cout << "#2 : DETECT KEYPOINTS done" << std::endl;
 
+        continue;
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
         //// STUDENT ASSIGNMENT
@@ -150,7 +159,6 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        DescriptorType descriptorType = DescriptorType::BRISK; // BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
@@ -164,9 +172,6 @@ int main(int argc, const char *argv[])
             /* MATCH KEYPOINT DESCRIPTORS */
 
             std::vector<cv::DMatch> matches;
-            MatcherType matcherType = MatcherType::BF;        // MAT_BF, MAT_FLANN
-            DescriptorFormat descriptorFormat = DescriptorFormat::BINARY; // DES_BINARY, DES_HOG
-            SelectorType selectorType = SelectorType::NN;       // SEL_NN, SEL_KNN
 
             //// STUDENT ASSIGNMENT
             //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
