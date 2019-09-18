@@ -101,3 +101,7 @@ detecting keypoints on vehicles.
 ```
 
 TODO
+
+Problems
+--------
+- SIFT + ORB gives out-of-memory errors

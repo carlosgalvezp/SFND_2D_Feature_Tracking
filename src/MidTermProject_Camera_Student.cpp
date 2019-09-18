@@ -209,6 +209,25 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
     } // eof loop over all images
 }
 
+bool isValidExperiment(const DetectorType& detector_type, const DescriptorType& descriptor_type)
+{
+    // Cases documented not to work on UdacityHub
+    bool output = true;
+
+    if ((descriptor_type == DescriptorType::AKAZE) && (detector_type != DetectorType::AKAZE))
+    {
+        // AZAKE descriptor can only be used with KAZE or AKAZE keypoints
+        output = false;
+    }
+    else if ((detector_type == DetectorType::SIFT) && (descriptor_type == DescriptorType::ORB))
+    {
+        // out-of-memory errors with this combination
+        output = false;
+    }
+
+    return output;
+}
+
 /* MAIN PROGRAM */
 int main(int argc, const char *argv[])
 {
@@ -239,7 +258,10 @@ int main(int argc, const char *argv[])
     {
         for (const DescriptorType& descriptor_type : descriptors)
         {
-            runExperiment(detector_type, descriptor_type);
+            if (isValidExperiment(detector_type, descriptor_type))
+            {
+                runExperiment(detector_type, descriptor_type);
+            }
         }
     }
 
