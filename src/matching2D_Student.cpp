@@ -1,4 +1,5 @@
 #include <numeric>
+#include <sstream>
 #include "matching2D.h"
 
 namespace
@@ -22,20 +23,20 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
                       cv::Mat &descSource,
                       cv::Mat &descRef,
                       std::vector<cv::DMatch> &matches,
-                      std::string descriptorType,
-                      std::string matcherType,
-                      std::string selectorType)
+                      DescriptorFormat descriptorFormat,
+                      MatcherType matcherType,
+                      SelectorType selectorType)
 {
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
 
-    if (matcherType == "MAT_BF")
+    if (matcherType == MatcherType::BF)
     {
-        int normType = cv::NORM_HAMMING;
+        int normType = descriptorFormat == DescriptorFormat::BINARY ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
-    else if (matcherType == "MAT_FLANN")
+    else if (matcherType == MatcherType::FLANN)
     {
         // Convert binary descriptors to floating point due to a bug in current OpenCV implementation
         if (descSource.type() != CV_32F)
@@ -53,12 +54,12 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
     }
 
     // perform matching task
-    if (selectorType == "SEL_NN")
+    if (selectorType == SelectorType::NN)
     {
         // nearest neighbor (best match)
         matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
     }
-    else if (selectorType == "SEL_KNN")
+    else if (selectorType == SelectorType::KNN)
     {
         // k nearest neighbors (k=2)
         std::vector<std::vector<cv::DMatch>> knn_matches;
@@ -86,31 +87,31 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
 }
 
 // Use one of several types of state-of-art descriptors to uniquely identify keypoints
-void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType)
+void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, DescriptorType descriptorType)
 {
     // select appropriate descriptor
     cv::Ptr<cv::Feature2D> extractor;
-    if (descriptorType == "BRISK")
+    if (descriptorType == DescriptorType::BRISK)
     {
         extractor = cv::BRISK::create();
     }
-    else if (descriptorType == "BRIEF")
+    else if (descriptorType == DescriptorType::BRIEF)
     {
         extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
     }
-    else if (descriptorType == "ORB")
+    else if (descriptorType == DescriptorType::ORB)
     {
         extractor = cv::ORB::create();
     }
-    else if (descriptorType == "FREAK")
+    else if (descriptorType == DescriptorType::FREAK)
     {
         extractor = cv::xfeatures2d::FREAK::create();
     }
-    else if (descriptorType == "AKAZE")
+    else if (descriptorType == DescriptorType::AKAZE)
     {
         extractor = cv::AKAZE::create();
     }
-    else if (descriptorType == "SIFT")
+    else if (descriptorType == DescriptorType::SIFT)
     {
         extractor = cv::xfeatures2d::SIFT::create();
     }
@@ -231,30 +232,30 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
     }
 }
 
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis)
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis)
 {
     // Create detector. They all inherit from the cv::Feature2D interface class
     cv::Ptr<cv::Feature2D> detector;
 
     double t = static_cast<double>(cv::getTickCount());
 
-    if (detectorType == "FAST")
+    if (detectorType == DetectorType::FAST)
     {
         detector = cv::FastFeatureDetector::create();
     }
-    else if (detectorType == "BRISK")
+    else if (detectorType == DetectorType::BRISK)
     {
         detector = cv::BRISK::create();
     }
-    else if (detectorType == "ORB")
+    else if (detectorType == DetectorType::ORB)
     {
         detector = cv::ORB::create();
     }
-    else if (detectorType == "AKAZE")
+    else if (detectorType == DetectorType::AKAZE)
     {
         detector = cv::AKAZE::create();
     }
-    else if (detectorType == "SIFT")
+    else if (detectorType == DetectorType::SIFT)
     {
         detector = cv::xfeatures2d::SIFT::create();
     }
@@ -274,6 +275,52 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std:
     // Optionally visualize
     if (bVis)
     {
-        visualizeKeypoints(img, keypoints, detectorType + " Corner Detection Results");
+        std::stringstream ss;
+        ss << detectorType << " Corner Detection Results";
+        visualizeKeypoints(img, keypoints, ss.str());
     }
+}
+
+std::ostream& operator<<(std::ostream& os, const DetectorType& x)
+{
+    if (x == DetectorType::AKAZE) { os << "AZAKE"; }
+    else if (x == DetectorType::BRISK) { os << "BRISK"; }
+    else if (x == DetectorType::FAST) { os << "FAST"; }
+    else if (x == DetectorType::HARRIS) { os << "HARRIS"; }
+    else if (x == DetectorType::ORB) { os << "ORB"; }
+    else if (x == DetectorType::SHITOMASI) { os << "SHITOMASI"; }
+    else if (x == DetectorType::SIFT) { os << "SIFT"; }
+    else { os << "Unknown detector"; }
+}
+
+std::ostream& operator<<(std::ostream& os, const DescriptorType& x)
+{
+    if (x == DescriptorType::AKAZE) { os << "AZAKE"; }
+    else if (x == DescriptorType::BRIEF) { os << "BRIEF"; }
+    else if (x == DescriptorType::BRISK) { os << "BRISK"; }
+    else if (x == DescriptorType::FREAK) { os << "FREAK"; }
+    else if (x == DescriptorType::ORB) { os << "ORB"; }
+    else if (x == DescriptorType::SIFT) { os << "SIFT"; }
+    else { os << "Unknown descriptor"; }
+}
+
+std::ostream& operator<<(std::ostream& os, const DescriptorFormat& x)
+{
+    if (x == DescriptorFormat::BINARY) { os << "BINARY"; }
+    else if (x == DescriptorFormat::HOG) { os << "HOG"; }
+    else { os << "Unknown descriptor format"; }
+}
+
+std::ostream& operator<<(std::ostream& os, const MatcherType& x)
+{
+    if (x == MatcherType::BF) { os << "BF"; }
+    else if (x == MatcherType::FLANN) { os << "FLANN"; }
+    else { os << "Unknown matcher"; }
+}
+
+std::ostream& operator<<(std::ostream& os, const SelectorType& x)
+{
+    if (x == SelectorType::NN) { os << "NN"; }
+    else if (x == SelectorType::KNN) { os << "KNN"; }
+    else { os << "Unknown selector"; }
 }

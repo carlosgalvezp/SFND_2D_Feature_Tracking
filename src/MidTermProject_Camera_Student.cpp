@@ -82,18 +82,18 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         std::vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        std::string detectorType = "SHITOMASI";
+        DetectorType detectorType = DetectorType::SHITOMASI;
         bool visualize_detections = false;
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-        if (detectorType == "SHITOMASI")
+        if (detectorType == DetectorType::SHITOMASI)
         {
             detKeypointsShiTomasi(keypoints, imgGray, visualize_detections);
         }
-        else if (detectorType == "HARRIS")
+        else if (detectorType == DetectorType::HARRIS)
         {
             detKeypointsHarris(keypoints, imgGray, visualize_detections);
         }
@@ -131,7 +131,7 @@ int main(int argc, const char *argv[])
         {
             int maxKeypoints = 50;
 
-            if (detectorType.compare("SHITOMASI") == 0)
+            if (detectorType == DetectorType::SHITOMASI)
             { // there is no response info, so keep the first 50 as they are sorted in descending quality order
                 keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
             }
@@ -150,7 +150,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        std::string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+        DescriptorType descriptorType = DescriptorType::BRISK; // BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
@@ -164,16 +164,16 @@ int main(int argc, const char *argv[])
             /* MATCH KEYPOINT DESCRIPTORS */
 
             std::vector<cv::DMatch> matches;
-            std::string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-            std::string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-            std::string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+            MatcherType matcherType = MatcherType::BF;        // MAT_BF, MAT_FLANN
+            DescriptorFormat descriptorFormat = DescriptorFormat::BINARY; // DES_BINARY, DES_HOG
+            SelectorType selectorType = SelectorType::NN;       // SEL_NN, SEL_KNN
 
             //// STUDENT ASSIGNMENT
             //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
             //// TASK MP.6 -> add KNN match selection and perform descriptor distance ratio filtering with t=0.8 in file matching2D.cpp
             matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
                              (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
-                             matches, descriptorType, matcherType, selectorType);
+                             matches, descriptorFormat, matcherType, selectorType);
 
             //// EOF STUDENT ASSIGNMENT
 

@@ -18,12 +18,56 @@
 
 #include "dataStructures.h"
 
+enum class DetectorType
+{
+    SHITOMASI,
+    HARRIS,
+    FAST,
+    BRISK,
+    ORB,
+    AKAZE,
+    SIFT
+};
+
+enum class DescriptorType
+{
+    BRISK,
+    BRIEF,
+    ORB,
+    FREAK,
+    AKAZE,
+    SIFT
+};
+
+enum class DescriptorFormat
+{
+    BINARY,
+    HOG
+};
+
+enum class MatcherType
+{
+    BF,
+    FLANN
+};
+
+enum class SelectorType
+{
+    NN,
+    KNN
+};
 
 void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis=false);
 void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis=false);
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis=false);
-void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType);
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis=false);
+void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, DescriptorType descriptorType);
 void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
-                      std::vector<cv::DMatch> &matches, std::string descriptorType, std::string matcherType, std::string selectorType);
+                      std::vector<cv::DMatch> &matches, DescriptorFormat descriptorFormat, MatcherType matcherType, SelectorType selectorType);
+
+std::ostream& operator<<(std::ostream& os, const DetectorType& x);
+std::ostream& operator<<(std::ostream& os, const DescriptorType& x);
+std::ostream& operator<<(std::ostream& os, const DescriptorFormat& x);
+std::ostream& operator<<(std::ostream& os, const MatcherType& x);
+std::ostream& operator<<(std::ostream& os, const SelectorType& x);
 
 #endif /* matching2D_hpp */
