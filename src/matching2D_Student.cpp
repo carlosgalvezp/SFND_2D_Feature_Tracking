@@ -237,8 +237,6 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
     // Create detector. They all inherit from the cv::Feature2D interface class
     cv::Ptr<cv::Feature2D> detector;
 
-    double t = static_cast<double>(cv::getTickCount());
-
     if (detectorType == DetectorType::FAST)
     {
         detector = cv::FastFeatureDetector::create();
@@ -266,6 +264,8 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
     }
 
     // Compute keypoints
+    double t = static_cast<double>(cv::getTickCount());
+
     detector->detect(img, keypoints);
 
     t = (static_cast<double>(cv::getTickCount()) - t) / cv::getTickFrequency();

@@ -17,9 +17,11 @@
 #include "matching2D.h"
 
 
-/* MAIN PROGRAM */
-int main(int argc, const char *argv[])
+void runExperiment(const DetectorType& detectorType, const DescriptorType& descriptorType)
 {
+    std::cout << "=================================================================================";
+    std::cout << "Experiment with detector: " << detectorType << ", descriptor: " << descriptorType << std::endl;
+    std::cout << "=================================================================================";
     /* INIT VARIABLES AND DATA STRUCTURES */
 
     // data location
@@ -39,11 +41,9 @@ int main(int argc, const char *argv[])
     bool bVis = false;            // visualize results
 
     // Experiment configuration
-    const DetectorType detectorType = DetectorType::SIFT;
-    const DescriptorType descriptorType = DescriptorType::BRISK;
     const DescriptorFormat descriptorFormat = getDescriptorFormat(descriptorType);
-    const MatcherType matcherType = MatcherType::BF;
-    const SelectorType selectorType = SelectorType::NN;
+    const MatcherType matcherType = MatcherType::BF;  // Requested in rubric
+    const SelectorType selectorType = SelectorType::KNN;  // To use distance ratio of 0.8
 
     /* MAIN LOOP OVER ALL IMAGES */
 
@@ -151,7 +151,6 @@ int main(int argc, const char *argv[])
         dataBuffer.back().keypoints = keypoints;
         std::cout << "#2 : DETECT KEYPOINTS done" << std::endl;
 
-        continue;
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
         //// STUDENT ASSIGNMENT
@@ -208,6 +207,41 @@ int main(int argc, const char *argv[])
         }
 
     } // eof loop over all images
+}
+
+/* MAIN PROGRAM */
+int main(int argc, const char *argv[])
+{
+    // Define experiments
+    const std::vector<DetectorType> detectors =
+    {
+        DetectorType::AKAZE,
+        DetectorType::BRISK,
+        DetectorType::FAST,
+        DetectorType::HARRIS,
+        DetectorType::ORB,
+        DetectorType::SHITOMASI,
+        DetectorType::SIFT,
+    };
+
+    const std::vector<DescriptorType> descriptors =
+    {
+        DescriptorType::BRISK,
+        DescriptorType::BRIEF,
+        DescriptorType::ORB,
+        DescriptorType::FREAK,
+        DescriptorType::AKAZE,
+        DescriptorType::SIFT
+    };
+
+    // Run all combinations
+    for (const DetectorType& detector_type : detectors)
+    {
+        for (const DescriptorType& descriptor_type : descriptors)
+        {
+            runExperiment(detector_type, descriptor_type);
+        }
+    }
 
     return 0;
 }
