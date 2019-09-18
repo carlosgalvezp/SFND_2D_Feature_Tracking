@@ -87,7 +87,8 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
 }
 
 // Use one of several types of state-of-art descriptors to uniquely identify keypoints
-void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, DescriptorType descriptorType)
+void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors,
+                   DescriptorType descriptorType, std::vector<double>& computation_time_descriptor)
 {
     // select appropriate descriptor
     cv::Ptr<cv::Feature2D> extractor;
@@ -126,10 +127,13 @@ void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &
     extractor->compute(img, keypoints, descriptors);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
     std::cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" <<std::endl;
+
+    computation_time_descriptor.push_back(t);
 }
 
 // Detect keypoints in image using the traditional Shi-Thomasi detector
-void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis)
+void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis,
+                           std::vector<double>& computation_time_detector)
 {
     // compute detector parameters based on image size
     int block_size = 4;       //  size of an average block for computing a derivative covariation matrix over each pixel neighborhood
@@ -161,9 +165,12 @@ void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, b
     {
         visualizeKeypoints(img, keypoints, "Shi-Tomasi Corner Detector Results");
     }
+
+    computation_time_detector.push_back(t);
 }
 
-void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis)
+void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis,
+                        std::vector<double>& computation_time_detector)
 {
     // Detector parameters
     const int block_size = 2;     // for every pixel, a block_size × block_size neighborhood is considered
@@ -230,9 +237,12 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
     {
         visualizeKeypoints(img, keypoints, "Harris Corner Detection Results");
     }
+
+    computation_time_detector.push_back(t);
 }
 
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis)
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType,
+                        bool bVis, std::vector<double>& computation_time_detector)
 {
     // Create detector. They all inherit from the cv::Feature2D interface class
     cv::Ptr<cv::Feature2D> detector;
@@ -279,6 +289,8 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
         ss << detectorType << " Corner Detection Results";
         visualizeKeypoints(img, keypoints, ss.str());
     }
+
+    computation_time_detector.push_back(t);
 }
 
 std::ostream& operator<<(std::ostream& os, const DetectorType& x)

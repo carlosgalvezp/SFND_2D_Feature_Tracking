@@ -1,4 +1,5 @@
 /* INCLUDES FOR THIS PROJECT */
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -16,6 +17,15 @@
 #include "dataStructures.h"
 #include "matching2D.h"
 
+namespace
+{
+template <typename T>
+void displayStatistics(const std::string& name, const std::vector<T>& data)
+{
+    std::cout << name << *std::min_element(data.begin(), data.end()) << " - "
+                      << *std::max_element(data.begin(), data.end()) << std::endl;
+}
+}  // namespace
 
 void runExperiment(const DetectorType& detectorType, const DescriptorType& descriptorType)
 {
@@ -44,6 +54,12 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
     const DescriptorFormat descriptorFormat = getDescriptorFormat(descriptorType);
     const MatcherType matcherType = MatcherType::BF;  // Requested in rubric
     const SelectorType selectorType = SelectorType::KNN;  // To use distance ratio of 0.8
+
+    // Buffers to hold and compute statistics
+    std::vector<double> computation_time_detector;
+    std::vector<double> computation_time_descriptor;
+    std::vector<std::size_t> detected_keypoints;
+    std::vector<std::size_t> matched_keypoints;
 
     /* MAIN LOOP OVER ALL IMAGES */
 
@@ -97,15 +113,15 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
 
         if (detectorType == DetectorType::SHITOMASI)
         {
-            detKeypointsShiTomasi(keypoints, imgGray, visualize_detections);
+            detKeypointsShiTomasi(keypoints, imgGray, visualize_detections, computation_time_detector);
         }
         else if (detectorType == DetectorType::HARRIS)
         {
-            detKeypointsHarris(keypoints, imgGray, visualize_detections);
+            detKeypointsHarris(keypoints, imgGray, visualize_detections, computation_time_detector);
         }
         else
         {
-            detKeypointsModern(keypoints, imgGray, detectorType, visualize_detections);
+            detKeypointsModern(keypoints, imgGray, detectorType, visualize_detections, computation_time_detector);
         }
         //// EOF STUDENT ASSIGNMENT
 
@@ -130,7 +146,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
         keypoints = filtered_keypoints;
 
         std::cout << "Preceeding vehicle keypoints: " << keypoints.size() << std::endl;
-
+        detected_keypoints.push_back(keypoints.size());
         //// EOF STUDENT ASSIGNMENT
 
         // optional : limit number of keypoints (helpful for debugging and learning)
@@ -158,7 +174,11 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+        descKeypoints(dataBuffer.back().keypoints,
+                      dataBuffer.back().cameraImg,
+                      descriptors,
+                      descriptorType,
+                      computation_time_descriptor);
         //// EOF STUDENT ASSIGNMENT
 
         // push descriptors for current frame to end of data buffer
@@ -178,6 +198,7 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
             matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
                              (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
                              matches, descriptorFormat, matcherType, selectorType);
+            matched_keypoints.push_back(matches.size());
 
             //// EOF STUDENT ASSIGNMENT
 
@@ -212,6 +233,21 @@ void runExperiment(const DetectorType& detectorType, const DescriptorType& descr
         std::cout << "-------------------------------------------------------------" << std::endl;
 
     } // eof loop over all images
+
+    // Display statistics for Excel
+    std::cout << "------------------ STATISTICS--------------";
+    displayStatistics("Detected keypoints: ", detected_keypoints);
+    displayStatistics("Matched keypoints: ", matched_keypoints);
+    displayStatistics("Detector computation time (ms): ", computation_time_detector);
+    displayStatistics("Descriptor computation time (ms): ", computation_time_descriptor);
+
+    std::cout << "Total computation time (ms): "
+              << (*std::min_element(computation_time_detector.begin(), computation_time_detector.end()) +
+                  *std::min_element(computation_time_descriptor.begin(), computation_time_descriptor.end()))
+              << " - "
+              << (*std::max_element(computation_time_detector.begin(), computation_time_detector.end()) +
+                  *std::max_element(computation_time_descriptor.begin(), computation_time_descriptor.end()))
+              << std::endl;
 }
 
 bool isValidExperiment(const DetectorType& detector_type, const DescriptorType& descriptor_type)
