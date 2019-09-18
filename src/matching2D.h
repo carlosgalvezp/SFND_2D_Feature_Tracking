@@ -70,4 +70,6 @@ std::ostream& operator<<(std::ostream& os, const DescriptorFormat& x);
 std::ostream& operator<<(std::ostream& os, const MatcherType& x);
 std::ostream& operator<<(std::ostream& os, const SelectorType& x);
 
+DescriptorFormat getDescriptorFormat(const DescriptorType& descriptor_type);
+
 #endif /* matching2D_hpp */

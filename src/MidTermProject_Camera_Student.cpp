@@ -41,8 +41,8 @@ int main(int argc, const char *argv[])
     // Experiment configuration
     const DetectorType detectorType = DetectorType::SIFT;
     const DescriptorType descriptorType = DescriptorType::BRISK;
+    const DescriptorFormat descriptorFormat = getDescriptorFormat(descriptorType);
     const MatcherType matcherType = MatcherType::BF;
-    const DescriptorFormat descriptorFormat = DescriptorFormat::BINARY;
     const SelectorType selectorType = SelectorType::NN;
 
     /* MAIN LOOP OVER ALL IMAGES */

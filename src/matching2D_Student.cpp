@@ -324,3 +324,18 @@ std::ostream& operator<<(std::ostream& os, const SelectorType& x)
     else if (x == SelectorType::KNN) { os << "KNN"; }
     else { os << "Unknown selector"; }
 }
+
+DescriptorFormat getDescriptorFormat(const DescriptorType& descriptor_type)
+{
+    DescriptorFormat output;
+
+    if (descriptor_type == DescriptorType::AKAZE) { output = DescriptorFormat::BINARY; }
+    else if (descriptor_type == DescriptorType::BRIEF) { output = DescriptorFormat::BINARY; }
+    else if (descriptor_type == DescriptorType::BRISK) { output = DescriptorFormat::BINARY; }
+    else if (descriptor_type == DescriptorType::FREAK) { output = DescriptorFormat::BINARY; }
+    else if (descriptor_type == DescriptorType::ORB) { output = DescriptorFormat::BINARY;}
+    else if (descriptor_type == DescriptorType::SIFT) { output = DescriptorFormat::HOG; }
+    else { std::cerr << "Unknown descriptor" << std::endl; }
+
+    return output;
+}
